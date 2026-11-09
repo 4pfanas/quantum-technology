@@ -1,0 +1,714 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'></head><body><title>Quantum Technology</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="How quantum computers are reached, built, measured and improved, with a 127-qubit lattice, detailed diagrams, a performance lab and a roadmap.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: full-width sections, each opening on a centred sentence-case headline, then a wide figure, then cards; dark first.
+   Color: near-black ground, cool off-white ink, one electric blue, orange for excitation, rose for errors, green for success.
+   Type: Geist at medium weight with tight tracking for headlines, Geist Mono for readouts and labels. */
+:root {
+  color-scheme: dark;
+  --bg: #050607; --surface: #0C0E11; --raise: #12151A; --ink: #EDEFF3; --muted: #8C939F; --line: #1D2127; --line2: #2A3039;
+  --accent: #6F8CFF; --on-accent: #050607; --hot: #FF9A52; --err: #FF6B8F; --ok: #4FD6A1;
+  --q: #5E6B8E; --qlink: #2C3652;
+  --a1: #6F8CFF; --a2: #B48CFF; --a3: #4CCBE3; --a4: #FF9A52;
+  --f: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --m: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  color-scheme: light;
+  --bg: #F4F5F8; --surface: #FFFFFF; --raise: #EEF0F5; --ink: #0B0E14; --muted: #5A6372; --line: #DCE0E8; --line2: #C6CCD8;
+  --accent: #2B3FE0; --on-accent: #FFFFFF; --hot: #E8590C; --err: #D6245A; --ok: #12805C;
+  --q: #7C89AD; --qlink: #B9C2D8;
+  --a1: #2B3FE0; --a2: #7A3FE0; --a3: #0E8FA8; --a4: #E8590C; } }
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F4F5F8; --surface: #FFFFFF; --raise: #EEF0F5; --ink: #0B0E14; --muted: #5A6372; --line: #DCE0E8; --line2: #C6CCD8;
+  --accent: #2B3FE0; --on-accent: #FFFFFF; --hot: #E8590C; --err: #D6245A; --ok: #12805C;
+  --q: #7C89AD; --qlink: #B9C2D8;
+  --a1: #2B3FE0; --a2: #7A3FE0; --a3: #0E8FA8; --a4: #E8590C; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16.5px/1.6 var(--f); -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 40; }
+a { color: inherit; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+button { font: inherit; color: inherit; }
+h1, h2, h3, h4, p, ul, ol { margin: 0; } ul, ol { padding: 0; list-style: none; }
+.wrap { width: min(1240px, 100%); margin: 0 auto; }
+.mono { font-family: var(--m); font-variant-numeric: tabular-nums; } .muted { color: var(--muted); }
+
+/* nav */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; height: 60px; display: flex; align-items: center; gap: 20px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line); margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0 calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+.top::after { content: ""; position: absolute; left: 0; bottom: -1px; height: 1px; width: calc(var(--prog, 0) * 100%); background: var(--accent); }
+.brand { font: 500 15px var(--m); text-decoration: none; display: flex; gap: 8px; align-items: center; margin-right: auto; }
+.brand i { color: var(--accent); font-style: normal; }
+.top nav { display: flex; gap: 26px; font-size: 14px; } .top nav a { color: var(--muted); text-decoration: none; } .top nav a:hover, .top nav a.on { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 500 14px var(--f); background: transparent; color: var(--ink); border: 1px solid var(--line2); border-radius: 999px; padding: 0 18px; min-height: 40px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:hover { border-color: var(--ink); }
+.btn.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); } .btn.solid:hover { opacity: .88; }
+.btn.acc { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.btn.sm { min-height: 34px; padding: 0 14px; font-size: 13px; }
+.btn[aria-pressed="true"], .btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.pill { display: inline-flex; gap: 10px; align-items: center; font: 400 13px var(--f); padding: 6px 14px 6px 8px; border: 1px solid var(--line2); border-radius: 999px; color: var(--muted); text-decoration: none; }
+.pill b { font: 500 11px var(--m); background: var(--accent); color: var(--on-accent); padding: 2px 8px; border-radius: 999px; }
+.pill:hover { color: var(--ink); border-color: var(--ink); }
+
+/* type */
+h1 { font-weight: 500; font-size: clamp(44px, 6.6vw, 92px); line-height: .98; letter-spacing: -.045em; text-wrap: balance; }
+h2 { font-weight: 500; font-size: clamp(34px, 4.6vw, 62px); line-height: 1.02; letter-spacing: -.04em; text-wrap: balance; }
+h3 { font-weight: 500; font-size: 20px; line-height: 1.25; letter-spacing: -.015em; } h4 { font-weight: 500; font-size: 15px; }
+.lede { font-size: clamp(17px, 1.5vw, 20px); color: var(--muted); max-width: 52ch; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: 32px 48px; align-items: center; padding-block: 56px 28px; }
+.hero > div { min-width: 0; display: grid; gap: 24px; justify-items: start; }
+.acts { display: flex; flex-wrap: wrap; gap: 10px; }
+.lat { width: 100%; max-width: 100%; position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; aspect-ratio: 1 / .8; min-height: 330px; }
+.lat canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+.lat .cap { position: absolute; left: 16px; right: 16px; bottom: 12px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 12px/1.4 var(--m); color: var(--muted); pointer-events: none; }
+.lat .tools { position: absolute; left: 12px; top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+.nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--muted); font-size: 14px; }
+.qpanel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-top: 10px; }
+.qpanel > div { background: var(--surface); padding: 12px 14px; min-width: 0; } .qpanel .l { font: 11px var(--m); color: var(--muted); } .qpanel .v { font: 500 15px var(--m); margin-top: 4px; overflow-wrap: anywhere; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font: 12px var(--m); color: var(--muted); } .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--c); }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--line); margin-top: 28px; }
+.stats > div { padding: 26px 22px 26px 0; display: grid; gap: 4px; } .stats > div + div { padding-left: 22px; border-left: 1px solid var(--line); }
+.stats .n { font: 500 clamp(30px, 3.6vw, 46px)/1 var(--f); letter-spacing: -.04em; } .stats .t { font-size: 14px; color: var(--muted); }
+
+/* section frame */
+.sec { padding-block: 120px 0; }
+.shead { display: grid; gap: 18px; justify-items: center; text-align: center; margin-bottom: 52px; } .shead h2 { max-width: 18ch; } .shead .lede { max-width: 60ch; }
+.eyebrow { font: 500 12px var(--m); color: var(--accent); letter-spacing: .04em; }
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; min-width: 0; }
+.fig + .fig, .fig + .cols, .cols + .fig, .fig + .cards, .cards + .fig, .cols + .cols { margin-top: 18px; }
+.cap2 { display: flex; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; font: 12px var(--m); color: var(--muted); margin-bottom: 14px; } .cap2 b { font-weight: 500; color: var(--accent); }
+.note { font-size: 13.5px; color: var(--muted); max-width: 78ch; margin-top: 14px; }
+.cols > .fig { margin-top: 0 !important; }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; } .cols > * { min-width: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card p { color: var(--muted); font-size: 15px; } .card .k { font: 500 12px var(--m); color: var(--accent); }
+.card .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.card .ico { width: 44px; height: 44px; border-radius: 10px; background: var(--raise); display: grid; place-items: center; }
+.card .tags { display: flex; gap: 6px; flex-wrap: wrap; } .tg { font: 11px var(--m); padding: 3px 9px; border: 1px solid var(--line2); border-radius: 999px; color: var(--muted); } .tg.on { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.pillars > div { padding: 28px 28px 8px 0; display: grid; gap: 10px; align-content: start; } .pillars > div + div { padding-left: 28px; border-left: 1px solid var(--line); }
+.pillars p { color: var(--muted); font-size: 15px; max-width: 34ch; } .pillars .n { font: 500 13px var(--m); color: var(--accent); }
+
+/* svg */
+svg text { font-family: var(--f); fill: var(--ink); }
+.svt { font: 12px var(--m); fill: var(--muted); } .svs { font: 500 17px var(--f); fill: var(--ink); } .svb { font: 13px var(--f); fill: var(--muted); }
+.stk .pt { fill: color-mix(in srgb, var(--c) 13%, var(--surface)); stroke: var(--c); stroke-width: 1.4; transition: fill .2s; }
+.stk .ps { fill: color-mix(in srgb, var(--c) 30%, var(--surface)); stroke: var(--c); stroke-width: 1; }
+.stk .gl { fill: none; stroke: var(--c); stroke-width: 1.2; } .stk .gf { fill: color-mix(in srgb, var(--c) 40%, transparent); stroke: var(--c); stroke-width: 1; } .stk .gd { fill: var(--c); }
+.stk .ly { cursor: pointer; outline: none; } .stk .ly:hover .pt, .stk .ly:focus-visible .pt, .stk .ly.sel .pt { fill: color-mix(in srgb, var(--c) 28%, var(--surface)); } .stk .ly.sel .pt { stroke-width: 2.4; }
+.stk .ly.sel .svs { fill: var(--c); } .stk .ld { stroke: var(--line2); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+.stk .axis { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 5; opacity: .6; fill: none; }
+.stk .cld { fill: none; stroke: var(--a2); stroke-width: 1.4; } .stk .brk { fill: none; stroke: var(--line2); stroke-width: 1.2; }
+.stk .job { transition: transform .6s cubic-bezier(.5, 0, .3, 1); } .stk .job circle { fill: var(--hot); stroke: var(--surface); stroke-width: 2; } .stk .job.back circle { fill: var(--ok); }
+.ax { stroke: var(--line2); stroke-width: 1; fill: none; } .gr { stroke: var(--line); stroke-width: 1; fill: none; }
+.cv { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.ctl { display: grid; gap: 14px; }
+.ctl label { display: grid; grid-template-columns: 190px minmax(0, 1fr) 84px; gap: 14px; align-items: center; font-size: 14px; }
+.ctl output { font: 500 13px var(--m); text-align: right; color: var(--accent); }
+input[type=range] { width: 100%; accent-color: var(--accent); min-height: 30px; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.kpis > div { background: var(--surface); padding: 16px 18px; min-width: 0; } .kpis .v { font: 500 clamp(20px, 2.4vw, 28px)/1.15 var(--m); overflow-wrap: anywhere; } .kpis .v.big { color: var(--accent); } .kpis .l { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.meter { height: 5px; background: var(--raise); margin-top: 10px; border-radius: 3px; overflow: hidden; } .meter i { display: block; height: 100%; background: var(--accent); }
+.row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; } .row label { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; } .tbl th, .tbl td { text-align: left; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; } .tbl th { font: 500 11.5px var(--m); color: var(--muted); } .tbl td:first-child { color: var(--ink); white-space: nowrap; } .tbl td { color: var(--muted); }
+.tw { overflow-x: auto; }
+.quiz { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; } .quiz .q { font-weight: 500; flex-basis: 100%; font-size: 17px; } .fb { flex-basis: 100%; font-size: 15px; color: var(--muted); max-width: 70ch; }
+.panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 20px 40px; margin-top: 22px; border-top: 1px solid var(--line); padding-top: 22px; } .panel p { color: var(--muted); margin-top: 8px; max-width: 58ch; } .panel ul { color: var(--muted); margin-top: 8px; } .panel li { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.stepline { font-size: 14.5px; min-height: 3em; margin-top: 12px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* error correction */
+.ec { display: grid; gap: 3px; } .ecrow { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: center; } .ecrow span { font: 11px var(--m); color: var(--muted); text-align: right; }
+.cells { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; padding: 3px; border-radius: 6px; } .cells.fail { background: color-mix(in srgb, var(--err) 18%, transparent); }
+.cells i { aspect-ratio: 1; background: var(--raise); display: block; border-radius: 1px; } .cells i.ck { border-radius: 50%; background: color-mix(in srgb, var(--a3) 22%, var(--raise)); }
+.cells i.e { background: var(--err); } .cells.fail i { background: color-mix(in srgb, var(--err) 50%, var(--raise)); }
+.ecl { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 12px var(--m); color: var(--muted); margin: 12px 0 0; } .ecl i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+
+/* roadmap */
+.road { display: grid; grid-template-columns: 120px repeat(6, minmax(86px, 1fr)); min-width: 760px; }
+.road .h { font: 500 12px var(--m); color: var(--muted); padding: 0 0 10px; border-bottom: 1px solid var(--line2); text-align: center; } .road .ln { font: 500 13px var(--f); padding: 20px 10px 20px 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+.road .c { border-bottom: 1px solid var(--line); border-left: 1px dashed var(--line); display: grid; place-items: center; padding: 10px 4px; min-height: 70px; }
+.rn { background: var(--raise); border: 1px solid var(--line2); border-radius: 999px; padding: 7px 12px; font: 500 12px var(--f); cursor: pointer; display: inline-flex; gap: 8px; align-items: center; min-height: 36px; text-align: left; }
+.rn:hover { border-color: var(--ink); } .rn i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; } .rn.on { background: var(--c); border-color: var(--c); color: var(--on-accent); } .rn.on i { background: var(--on-accent); }
+.bars { display: grid; gap: 10px; } .bar { display: grid; grid-template-columns: 150px minmax(0, 1fr) 86px; gap: 12px; align-items: center; font-size: 13.5px; } .bar .tr { height: 8px; background: var(--raise); border-radius: 4px; overflow: hidden; } .bar .tr i { display: block; height: 100%; background: var(--c, var(--accent)); } .bar b { font: 500 12.5px var(--m); text-align: right; }
+
+.terms { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; } .terms .btn { min-height: 38px; }
+.defn { text-align: center; max-width: 62ch; margin: 20px auto 0; min-height: 4.6em; color: var(--muted); } .defn b { color: var(--ink); font-weight: 500; }
+.take { display: grid; } .take li { padding: 20px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; max-width: 80ch; font-size: 18px; counter-increment: t; } .take li::before { content: counter(t, decimal-leading-zero); font: 500 13px var(--m); color: var(--accent); padding-top: 6px; } .take { counter-reset: t; }
+footer { margin-top: 120px; padding-block: 48px 56px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); gap: 32px; font-size: 14px; color: var(--muted); }
+footer h4 { color: var(--ink); margin-bottom: 12px; } footer li { padding: 4px 0; } footer a { text-decoration: none; } footer a:hover { color: var(--ink); } footer p { max-width: 44ch; margin-top: 10px; }
+
+@media (max-width: 960px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 36px 20px; } h1 { overflow-wrap: anywhere; }
+  .sec { padding-block: 84px 0; } .shead { margin-bottom: 36px; }
+  .cols, .panel, .pillars, footer { grid-template-columns: minmax(0, 1fr); }
+  .pillars > div, .pillars > div + div { padding: 22px 0; border-left: 0; border-bottom: 1px solid var(--line); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats > div:nth-child(3) { padding-left: 0; border-left: 0; } .stats > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .ctl label { grid-template-columns: minmax(0, 1fr) 80px; } .ctl label > span { grid-column: 1 / -1; }
+  .top nav, .top .btn:not(.solid) { display: none; } .top .btn.solid { padding: 0 12px; } .kpis { grid-template-columns: minmax(0, 1fr); } .qpanel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fig { padding: 16px; } .svgw { overflow-x: auto; } .svgw > svg { min-width: 640px; }
+  .bar { grid-template-columns: 110px minmax(0, 1fr) 74px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .stk .job { transition: none; } }
+</style>
+
+<header class="top"><a class="brand" href="#top"><i>./</i>quantum-technology</a>
+<nav><a href="#stack">Access</a><a href="#qubits">Qubits</a><a href="#performance">Performance</a><a href="#next">What's next</a></nav>
+<a class="btn sm" href="#stack">Open the stack</a><a class="btn sm solid" href="https://quantum.cloud.ibm.com/learning/en/courses/quantum-business-foundations/quantum-technology" target="_blank" rel="noopener">Read the source</a></header>
+
+<div class="wrap">
+<section class="hero" id="top">
+  <div>
+    <a class="pill" href="#next"><b>New</b>Error correction, as a toy you can break</a>
+    <h1>Quantum technology, from cloud to chip</h1>
+    <p class="lede">Useful quantum computing needs quantum and classical machines working together. Follow one real system: the service you call, the superconducting processor in the fridge, how its performance is measured, and where the roadmap goes.</p>
+    <div class="acts"><a class="btn acc" href="#stack">Start with the stack</a><button class="btn" id="heroPulse">Send a pulse through the chip</button></div>
+  </div>
+  <div>
+    <div class="lat" id="heroLat"><canvas id="heroCv" aria-label="Interactive 3D view of a 127-qubit processor lattice. Drag to turn it, click a qubit to select it and send a pulse."></canvas>
+      <div class="tools" role="group" aria-label="Colour the qubits by"><button class="btn sm on" data-mode="plain">Plain</button><button class="btn sm" data-mode="deg">By connections</button><button class="btn sm" data-mode="row">By row</button></div>
+      <div class="cap"><span>127 qubits · heavy-hex lattice</span><span id="heroRead" aria-live="polite">Drag to turn · click a qubit</span></div></div>
+    <div class="qpanel" aria-live="polite"><div><div class="l">qubit</div><div class="v" id="qpId">none</div></div><div><div class="l">row</div><div class="v" id="qpRow">-</div></div><div><div class="l">connections</div><div class="v" id="qpDeg">-</div></div><div><div class="l">neighbours</div><div class="v" id="qpNb">-</div></div></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</section>
+<div class="stats">
+  <div><span class="n" id="stQ">127</span><span class="t">qubits on the lattice, the size of IBM's smallest current system</span></div>
+  <div><span class="n" id="stE">144</span><span class="t">couplings between neighbouring qubits</span></div>
+  <div><span class="n">3</span><span class="t">performance dimensions: scale, quality, speed</span></div>
+  <div><span class="n">288 → 12</span><span class="t">physical qubits protecting logical qubits with the Gross code</span></div>
+</div>
+
+<section class="sec" id="questions">
+  <div class="shead"><span class="eyebrow">What this page covers</span><h2>Quantum and classical, side by side</h2><p class="lede">Three questions run through the whole course, and each one has a section below.</p></div>
+  <div class="pillars">
+    <div><span class="n">Why both?</span><h3>Real problems need quantum and classical resources</h3><p>The quantum processor does one part of the job. Classical computers prepare it, check it and run what is left.</p></div>
+    <div><span class="n">What exists?</span><h3>Hardware, software and services</h3><p>A cloud platform, middleware, a runtime beside the chip, and the superconducting processor itself.</p></div>
+    <div><span class="n">How good?</span><h3>Scale, quality and speed</h3><p>Qubit count alone does not describe a machine. Three dimensions together do.</p></div>
+  </div>
+</section>
+
+<!-- ============ STACK ============ -->
+<section class="sec" id="stack">
+  <div class="shead"><span class="eyebrow">Hardware, software and services</span><h2>How you reach a quantum computer</h2><p class="lede">You never touch the chip. You send a program to a platform, and layers of classical software carry it to the processor and bring the answer back.</p></div>
+  <div class="fig">
+    <div class="cap2"><span>Fig 1 · the access stack, pulled apart</span><b id="stkTag">Quantum Platform</b></div>
+    <div class="svgw"><div id="stk" class="stk"></div></div>
+    <div class="row" style="margin-top:8px"><button class="btn acc" id="stkRun">Send a job</button><span class="muted" style="font-size:13.5px">Or click any layer.</span></div>
+    <p class="stepline" id="stkStep" aria-live="polite"></p>
+    <div class="panel" id="stkInfo"></div>
+  </div>
+  <div class="cols">
+    <div class="fig"><div class="cap2"><span>Fig 2 · the GPU comparison</span><b>why a runtime beside the chip</b></div>
+      <div class="svgw"><svg viewBox="0 0 520 250" width="100%" role="img" aria-label="A classical computer with a GPU accelerator compared with a classical program with a quantum processor accelerator"><g>
+        <text class="svt" x="0" y="14">Classical computing</text>
+        <rect x="0" y="26" width="150" height="62" rx="8" fill="var(--raise)" stroke="var(--line2)"/><text class="svs" x="16" y="55">Main program</text><text class="svb" x="16" y="74">runs on a CPU</text>
+        <path d="M150 57H236" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ah)"/><text class="svt" x="160" y="48">offload</text>
+        <rect x="240" y="26" width="150" height="62" rx="8" fill="color-mix(in srgb, var(--a3) 14%, var(--surface))" stroke="var(--a3)"/><text class="svs" x="256" y="55">GPU</text><text class="svb" x="256" y="74">speeds up the heavy part</text>
+        <text class="svt" x="0" y="142">Quantum computing</text>
+        <rect x="0" y="154" width="150" height="62" rx="8" fill="var(--raise)" stroke="var(--line2)"/><text class="svs" x="16" y="183">Quantum program</text><text class="svb" x="16" y="202">written with Qiskit</text>
+        <path d="M150 185H236" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ah)"/><text class="svt" x="160" y="176">submit</text>
+        <rect x="240" y="154" width="150" height="62" rx="8" fill="color-mix(in srgb, var(--a3) 14%, var(--surface))" stroke="var(--a3)"/><text class="svs" x="256" y="183">Compute Service</text><text class="svb" x="256" y="202">classical unit by the chip</text>
+        <path d="M390 185H436" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ah)"/>
+        <rect x="440" y="154" width="76" height="62" rx="8" fill="color-mix(in srgb, var(--a4) 14%, var(--surface))" stroke="var(--a4)"/><text class="svs" x="452" y="183">QPU</text><text class="svb" x="452" y="202">the chip</text>
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs></g></svg></div>
+      <p class="note">IBM compares the Compute Service to a GPU: it accelerates the computation instead of replacing the main program.</p></div>
+    <div class="fig"><div class="cap2"><span>Fig 3 · what each layer does</span><b>at a glance</b></div>
+      <div class="tw"><table class="tbl"><thead><tr><th>Layer</th><th>Does</th><th>Side</th></tr></thead><tbody id="stkTbl"></tbody></table></div></div>
+  </div>
+</section>
+
+<!-- ============ QUBITS ============ -->
+<section class="sec" id="qubits">
+  <div class="shead"><span class="eyebrow">Hardware</span><h2>What the qubits are made of</h2><p class="lede">Superconducting transmon qubits are not the only kind. They are the kind in IBM's fleet of systems, each with at least 127 qubits and described as the largest in the world.</p></div>
+  <div class="fig">
+    <div class="cap2"><span>Fig 4 · qubit technologies, drawn side by side</span><b id="qtTag">transmon qubits</b></div>
+    <div class="tabs" id="qtTabs" role="group" aria-label="Qubit type"></div>
+    <div class="panel" id="qtPanel"></div>
+  </div>
+  <div class="fig"><div class="cap2"><span>Fig 5 · comparison</span><b>from the course and IBM's overview</b></div>
+    <div class="tw"><table class="tbl"><thead><tr><th>Type</th><th>Made from</th><th>Environment</th><th>Known for</th><th>In IBM systems</th></tr></thead>
+      <tbody><tr><td>Superconducting</td><td>Superconducting circuits on a silicon substrate</td><td>Near absolute zero so current can flow</td><td>Fast, finely controllable</td><td>Yes, transmon qubits</td></tr>
+      <tr><td>Photonic</td><td>Single photons</td><td>Not specified on the course page</td><td>Quantum communication and cryptography</td><td>No</td></tr>
+      <tr><td>Trapped ion</td><td>Charged atoms</td><td>Not specified on the course page</td><td>Long coherence times, slower operation</td><td>No</td></tr></tbody></table></div></div>
+</section>
+
+<!-- ============ PERFORMANCE ============ -->
+<section class="sec" id="performance">
+  <div class="shead"><span class="eyebrow">How good?</span><h2>Power is more than qubit count</h2><p class="lede">Today's machines are not yet fully fault tolerant, so the number of qubits says little by itself. IBM looks at three dimensions together.</p></div>
+  <div class="cards">
+    <div class="card"><div class="k">Scale</div><h3>Programmable qubits</h3><p>The qubits a user can control directly in an algorithm.</p><div class="tags"><span class="tg">127+ on every IBM system here</span></div></div>
+    <div class="card"><div class="k">Quality</div><h3>Qubit operations (QuOps)</h3><p>How many demanding operations can run reliably before errors take over.</p></div>
+    <div class="card"><div class="k">Speed</div><h3>Maximum circuits per second</h3><p>Throughput: how much useful computation fits in a unit of time.</p></div>
+  </div>
+  <div class="fig">
+    <div class="cap2"><span>Fig 6 · the performance lab</span><b>a toy model</b></div>
+    <div class="cols" style="align-items:start">
+      <div>
+        <div class="lat" id="perfLat" style="aspect-ratio: 16 / 10; min-height: 260px"><canvas id="perfCv" aria-label="127-qubit lattice showing how many qubits are in use and how noisy they are"></canvas><div class="cap"><span id="perfCap"></span></div></div>
+        <div class="ctl" style="margin-top:18px">
+          <label><span>Scale: qubits used</span><input id="pN" type="range" min="1" max="127" value="127"><output id="pNo"></output></label>
+          <label><span>Quality: error per gate</span><input id="pE" type="range" min="0" max="100" value="81"><output id="pEo"></output></label>
+          <label><span>Speed: circuits per second</span><input id="pS" type="range" min="0" max="100" value="50"><output id="pSo"></output></label>
+        </div>
+        <div class="row" style="margin-top:14px"><span class="muted" style="font-size:13.5px">Try</span><button class="btn sm" data-pre="127,1,1000">Many qubits, noisy</button><button class="btn sm" data-pre="20,0.1,1000">Few qubits, clean</button><button class="btn sm" data-pre="100,0.1,1000">Balanced</button></div>
+      </div>
+      <div>
+        <div class="svgw"><svg id="chartP" viewBox="0 0 560 290" width="100%" role="img" aria-label="Chance a run finishes with no error against number of qubits, for three error rates, with the current setting marked"></svg></div>
+        <div class="svgw"><svg id="radar" viewBox="0 0 560 250" width="100%" role="img" aria-label="Triangle chart of scale, quality and speed for the current setting"></svg></div>
+      </div>
+    </div>
+    <div class="kpis" style="margin-top:18px">
+      <div><div class="v" id="kG">0</div><div class="l">gates in one circuit (10 layers)</div></div>
+      <div><div class="v" id="kP">0</div><div class="l">chance a run finishes with no error</div><div class="meter"><i id="kPm" style="width:0"></i></div></div>
+      <div><div class="v big" id="kR">0</div><div class="l">error-free runs per second</div></div>
+    </div>
+    <p class="note">Toy model: chance of no error = (1 − error)<sup>gates</sup>, with gates = qubits × 10. Quality here is a stand-in for IBM's QuOps, and speed is a plain rate. Real systems are more complicated.</p>
+  </div>
+  <div class="cards" style="margin-top:18px">
+    <div class="card"><div class="k">Benchmark</div><h3>Quantum Volume</h3><p>One number for overall capability that combines how many qubits you can use with how well gates work.</p><div class="tags"><span class="tg on">Scale</span><span class="tg on">Quality</span><span class="tg">Speed</span></div></div>
+    <div class="card"><div class="k">Benchmark</div><h3>CLOPS</h3><p>Circuit layer operations per second. How quickly a processor runs quantum volume circuits in series, counting both quantum and classical parts.</p><div class="tags"><span class="tg">Scale</span><span class="tg">Quality</span><span class="tg on">Speed</span></div></div>
+    <div class="card"><div class="k">Benchmark</div><h3>EPLG</h3><p>Error per layered gate. It comes from layer fidelity, which shows how well a processor runs whole layers of gates and exposes errors in single qubits, gates and crosstalk.</p><div class="tags"><span class="tg">Scale</span><span class="tg on">Quality</span><span class="tg">Speed</span></div></div>
+  </div>
+  <div class="fig"><div class="quiz"><span class="q">True or false: a quantum computer's power depends only on how many qubits it has.</span>
+    <button class="btn" data-ans="t">True</button><button class="btn" data-ans="f">False</button><p class="fb" id="fb" aria-live="polite"></p></div></div>
+</section>
+
+<!-- ============ NEXT ============ -->
+<section class="sec" id="next">
+  <div class="shead"><span class="eyebrow">What's next</span><h2>Useful today, fault tolerant tomorrow</h2><p class="lede">Current machines are noisy and sensitive to their surroundings. Classical computing grew by building in modules and running in parallel. Quantum computing is trying the same while doing useful work on the hardware it has.</p></div>
+
+  <div class="fig">
+    <div class="cap2"><span>Fig 7 · quantum utility, how the experiment worked</span><b>IBM and UC Berkeley</b></div>
+    <div class="cols" style="align-items:center">
+      <div class="svgw"><svg viewBox="0 0 540 280" width="100%" role="img" aria-label="Flow: a hard physics problem goes to a 127-qubit quantum run with error mitigation, and classical methods check the answer">
+        <rect x="0" y="105" width="120" height="70" rx="8" fill="var(--raise)" stroke="var(--line2)"/><text class="svs" x="14" y="135">Hard problem</text><text class="svb" x="14" y="155">quantum Ising model</text>
+        <path d="M120 125C150 125 150 52 180 52" class="ax" marker-end="url(#ah2)"/><path d="M120 155C150 155 150 228 180 228" class="ax" marker-end="url(#ah2)"/>
+        <rect x="184" y="14" width="190" height="82" rx="8" fill="color-mix(in srgb, var(--a4) 14%, var(--surface))" stroke="var(--a4)"/><text class="svs" x="198" y="42">127 qubits, Eagle</text><text class="svb" x="198" y="62">error mitigation with ZNE</text><text class="svb" x="198" y="80">estimates expectation values</text>
+        <rect x="184" y="190" width="190" height="76" rx="8" fill="color-mix(in srgb, var(--a3) 14%, var(--surface))" stroke="var(--a3)"/><text class="svs" x="198" y="218">Classical methods</text><text class="svb" x="198" y="238">tensor networks, HPC</text><text class="svb" x="198" y="254">agree, then falter</text>
+        <path d="M374 55C410 55 410 125 440 125" class="ax" marker-end="url(#ah2)"/><path d="M374 228C410 228 410 160 440 160" class="ax" marker-end="url(#ah2)"/>
+        <rect x="444" y="105" width="96" height="70" rx="8" fill="color-mix(in srgb, var(--ok) 14%, var(--surface))" stroke="var(--ok)"/><text class="svs" x="456" y="135">Result</text><text class="svb" x="456" y="155">trusted</text>
+        <path d="M279 98V186" stroke="var(--muted)" stroke-dasharray="3 4" fill="none"/><text class="svt" x="288" y="146">cross-check</text>
+        <defs><marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs></svg></div>
+      <div class="svgw"><svg viewBox="0 0 520 280" width="100%" role="img" aria-label="Schematic: classical approximation accuracy falls as the problem gets harder while the quantum result stays more trustworthy">
+        <path class="gr" d="M50 40H500M50 100H500M50 160H500M50 220H500"/><path class="ax" d="M50 20V240H500"/>
+        <path class="cv" style="stroke:var(--a3)" d="M50 52C150 54 220 70 280 120S400 215 500 232"/><path class="cv" style="stroke:var(--a4)" d="M50 56C180 58 300 70 400 88S470 104 500 110"/>
+        <text class="svt" x="50" y="262">easier</text><text class="svt" x="500" y="262" text-anchor="end">harder problem</text><text class="svt" x="44" y="30" text-anchor="end">trust</text>
+        <circle cx="500" cy="232" r="4" fill="var(--a3)"/><text class="svb" x="494" y="216" text-anchor="end" style="fill:var(--a3)">classical approximation</text><circle cx="500" cy="110" r="4" fill="var(--a4)"/><text class="svb" x="494" y="96" text-anchor="end" style="fill:var(--a4)">quantum with mitigation</text></svg></div>
+    </div>
+    <p class="note">The curves are a schematic of the course's description, not measured data. The idea: use a quantum computer to probe problems that challenge classical high-performance computing, then check the results classically.</p>
+  </div>
+
+  <div class="fig">
+    <div class="cap2"><span>Fig 8 · error correction, simplified</span><b id="ecState">12 of 12 logical qubits intact</b></div>
+    <div class="cols" style="align-items:start">
+      <div>
+        <div class="ec" id="ec"></div>
+        <div class="ecl"><span><i style="background:var(--raise)"></i>data qubit</span><span><i style="background:color-mix(in srgb, var(--a3) 30%, var(--raise));border-radius:50%"></i>check qubit</span><span><i style="background:var(--err)"></i>error</span><span><i style="background:color-mix(in srgb, var(--err) 50%, var(--raise))"></i>failed logical qubit</span></div>
+      </div>
+      <div>
+        <div class="ctl"><label><span>Error per qubit, per cycle</span><input id="ecP" type="range" min="1" max="60" value="10"><output id="ecPo"></output></label></div>
+        <div class="row" style="margin:14px 0"><button class="btn acc" id="ecRun">Run 50 cycles</button><button class="btn" id="ecReset">Reset</button><label><input type="checkbox" id="ecOn" checked> Error checks on</label></div>
+        <div class="svgw"><svg id="chartE" viewBox="0 0 520 190" width="100%" role="img" aria-label="Logical qubits still intact against check cycles"></svg></div>
+        <div class="kpis" style="margin-top:12px"><div><div class="v">288</div><div class="l">qubits in the Gross code block</div></div><div><div class="v">12</div><div class="l">logical qubits protected</div></div><div><div class="v">~1M</div><div class="l">check cycles, per IBM</div></div></div>
+      </div>
+    </div>
+    <p class="note">IBM's Gross code (Nature paper) is roughly 10 times more efficient than earlier methods: about 288 qubits protect 12 logical qubits for around a million error-check cycles. Here each row is one logical qubit made of 12 data and 12 check qubits. The toy adds random errors each cycle. With checks on, errors are cleared every cycle. A row fails when more than 3 of its qubits go wrong at once. It does not run the real code. Experts often expect practical fault-tolerant machines to need millions of physical qubits, and error mitigation and suppression will stay useful alongside correction.</p>
+  </div>
+
+  <div class="fig">
+    <div class="cap2"><span>Fig 9 · the roadmap, by lane</span><b id="tlTag">2023 · Quantum utility</b></div>
+    <div class="tw"><div class="road" id="road" role="group" aria-label="Roadmap by lane and year"></div></div>
+    <div class="panel" id="tlc" aria-live="polite"></div>
+  </div>
+
+  <div class="cols">
+    <div class="fig"><div class="cap2"><span>Fig 10 · the size of each milestone</span><b>log scale</b></div>
+      <h4 style="margin-bottom:10px" class="muted">Qubits</h4><div class="bars" id="bQ"></div>
+      <h4 style="margin:18px 0 10px" class="muted">Gates in one computation</h4><div class="bars" id="bG"></div>
+      <h4 style="margin:18px 0 10px" class="muted">Logical qubits</h4><div class="bars" id="bL"></div>
+      <p class="note">Bars are drawn on a log scale. Each value is a figure or goal that IBM states, not a forecast of this page.</p></div>
+    <div class="fig"><div class="cap2"><span>Fig 11 · quantum-centric supercomputing</span><b>modular by design</b></div>
+      <div class="svgw"><svg viewBox="0 0 520 330" width="100%" role="img" aria-label="Four chips linked together as one processor, connected to classical computing resources through hybrid cloud middleware"></svg><div id="modular"></div></div>
+      <p class="note">Crossbill, introduced in 2024, was the first single processor made from multiple chips. The plan combines modular design, quantum communication and hybrid cloud middleware on a path to 100,000 qubits and beyond.</p></div>
+  </div>
+
+  <div class="cards" style="margin-top:18px">
+    <div class="card"><div class="k">5k challenge</div><h3>Five thousand gates in one computation</h3><p>IBM works with the research community to find use cases that benefit from quantum computing. In 2024 it released a tool for calculating unbiased observables of long, high-quality circuits. The idea was once called the 100x100 challenge: 100+ qubits and deep circuits.</p></div>
+    <div class="card"><div class="k">Eagle</div><h3>127 qubits</h3><p>The processor behind the utility experiment. Transmon qubits on a heavy-hex lattice, the same layout drawn at the top of this page.</p><div class="btns"><button class="btn sm" data-go="a0">On the roadmap</button><a class="btn sm" href="#top">See the lattice</a></div></div>
+    <div class="card"><div class="k">Crossbill</div><h3>One processor, several chips</h3><p>The first single processor made from multiple chips, introduced in 2024 as a step toward modular scaling.</p><div class="btns"><button class="btn sm" data-go="h1">On the roadmap</button><a class="btn sm" href="#next">See Fig 11</a></div></div>
+    <div class="card"><div class="k">Starling</div><h3>200 logical qubits, 100 million gates</h3><p>A large-scale fault-tolerant system planned for 2029 and being built in Poughkeepsie, New York.</p><div class="btns"><button class="btn sm" data-go="e1">On the roadmap</button><a class="btn sm" href="#performance">How it is measured</a></div></div>
+  </div>
+
+  <div class="shead" style="margin-top:110px"><span class="eyebrow">Terms you will meet</span><h2>A short glossary</h2></div>
+  <div class="terms" id="terms" role="group" aria-label="Glossary terms"></div><p class="defn" id="defn" aria-live="polite"></p>
+
+  <div class="shead" style="margin-top:110px"><span class="eyebrow">Key takeaways</span><h2>What to remember</h2></div>
+  <ol class="take" style="margin:0 auto">
+    <li><span>Today's quantum computers are not fault tolerant.</span></li>
+    <li><span>Scale, quality and speed are the three performance dimensions. Quantum Volume, CLOPS and EPLG still help for specific hardware and workloads.</span></li>
+    <li><span>The IBM and UC Berkeley experiment gave evidence of reliable results at 127 qubits.</span></li>
+    <li><span>Quantum-centric supercomputing treats quantum as one part of a wider high-performance computing system, with classical and quantum working as a single unit.</span></li>
+  </ol>
+</section>
+
+<footer>
+  <div><a class="brand" href="#top"><i>./</i>quantum-technology</a><p>An independent interactive explainer by Anas Aslam. Not affiliated with IBM.</p></div>
+  <div><h4>Sections</h4><ul><li><a href="#stack">Access stack</a></li><li><a href="#qubits">Qubits</a></li><li><a href="#performance">Performance</a></li><li><a href="#next">What's next</a></li></ul></div>
+  <div><h4>Source</h4><ul><li><a href="https://quantum.cloud.ibm.com/learning/en/courses/quantum-business-foundations/quantum-technology" target="_blank" rel="noopener">IBM Quantum Learning: IBM Quantum technology</a></li><li><a href="https://www.ibm.com/think/topics/quantum-computing" target="_blank" rel="noopener">IBM Think: What is quantum computing?</a></li></ul></div>
+  <div><h4>Notes</h4><p style="margin-top:0">Text is paraphrased. Dates, targets and figures such as 288 qubits, 100,000 qubits and the 2023 utility date are IBM's own claims; the 2023 date comes from the IBM Think overview. The lattice follows the published heavy-hex layout of a 127-qubit processor. The performance lab and error-correction toy are simplified teaching models.</p></div>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fmtN = function (x) { return x.toLocaleString("en-US"); };
+  function qsa(s, r) { return [].slice.call((r || document).querySelectorAll(s)); }
+
+  /* ================= theme tokens for WebGL ================= */
+  var T = {};
+  function readTokens() {
+    if (!window.THREE) return;
+    var cs = getComputedStyle(document.documentElement), g = function (n) { return new THREE.Color(cs.getPropertyValue(n).trim() || "#888"); };
+    T.accent = g("--accent"); T.hot = g("--hot"); T.err = g("--err"); T.ok = g("--ok"); T.q = g("--q"); T.link = g("--qlink");
+    lattices.forEach(function (l) { l.refresh(); });
+  }
+
+  /* ================= 127-qubit heavy-hex lattice ================= */
+  function buildLattice() {
+    var nodes = [], edges = [], key = {}, r, c;
+    function add(k, x, y, row) { key[k] = nodes.length; nodes.push({ x: x - 7, y: y + 6, row: Math.floor(row), nb: [] }); }
+    for (r = 0; r < 7; r++) for (c = (r === 6 ? 1 : 0); c <= (r === 0 ? 13 : 14); c++) add(r + ":" + c, c, -2 * r, r);
+    for (r = 0; r < 6; r++) (r % 2 === 0 ? [0, 4, 8, 12] : [2, 6, 10, 14]).forEach(function (cc) { add("c" + r + ":" + cc, cc, -(2 * r + 1), r + .5); });
+    function link(a, b) { if (a == null || b == null) return; edges.push([a, b]); nodes[a].nb.push(b); nodes[b].nb.push(a); }
+    for (r = 0; r < 7; r++) for (c = 0; c < 14; c++) link(key[r + ":" + c], key[r + ":" + (c + 1)]);
+    for (r = 0; r < 6; r++) (r % 2 === 0 ? [0, 4, 8, 12] : [2, 6, 10, 14]).forEach(function (cc) { var m = key["c" + r + ":" + cc]; link(key[r + ":" + cc], m); link(m, key[(r + 1) + ":" + cc]); });
+    nodes.map(function (n, i) { return i; }).sort(function (a, b) { return (nodes[b].y - nodes[a].y) || (nodes[a].x - nodes[b].x); }).forEach(function (i, rank) { nodes[i].rank = rank; });
+    var byRank = []; nodes.forEach(function (n) { byRank[n.rank] = n; n.id = n.rank; });
+    return { nodes: nodes, edges: edges, byRank: byRank };
+  }
+  var LAT = buildLattice(), DEG = { 1: 0, 2: 0, 3: 0 };
+  LAT.nodes.forEach(function (n) { DEG[n.nb.length] = (DEG[n.nb.length] || 0) + 1; });
+  $("stQ").textContent = LAT.nodes.length; $("stE").textContent = LAT.edges.length;
+
+  var lattices = [], visible = new Map();
+  function Lattice(host, canvas, opt) {
+    var self = this, N = LAT.nodes.length, ren;
+    try { ren = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true }); } catch (e) { ren = null; }
+    if (!ren) { canvas.style.display = "none"; var m = document.createElement("div"); m.className = "nogl"; m.textContent = "The 3D view needs WebGL, which this browser did not provide."; host.insertBefore(m, host.firstChild); return; }
+    var scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 1, .1, 100), grp = new THREE.Group(), S = .56;
+    scene.add(grp);
+    var geo = new THREE.SphereGeometry(.2, 18, 14), meshes = [], pos = [], i;
+    for (i = 0; i < N; i++) { var nd = LAT.nodes[i], mm = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true })); mm.position.set(nd.x * S, nd.y * S, 0); mm.userData.i = i; grp.add(mm); meshes.push(mm); }
+    LAT.edges.forEach(function (e) { var a = LAT.nodes[e[0]], b = LAT.nodes[e[1]]; pos.push(a.x * S, a.y * S, 0, b.x * S, b.y * S, 0); });
+    var lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    var lines = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0x999999 })); grp.add(lines);
+    var st = { t0: [], err: [], hover: -1, sel: -1, mode: "plain", rotZ: .5, rotX: -.95, drag: null, last: -9, perf: null };
+    for (i = 0; i < N; i++) { st.t0.push(1e9); st.err.push(0); }
+    var ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), tmp = new THREE.Color(), base = new THREE.Color();
+    function size() { var w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; ren.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); ren.setSize(w, h, false); cam.aspect = w / h; cam.position.z = Math.max(16.5, 11.6 / (2 * Math.tan(16 * Math.PI / 180) * Math.min(1.25, cam.aspect))); cam.updateProjectionMatrix(); }
+    new ResizeObserver(size).observe(host); size();
+    this.refresh = function () { lines.material.color.copy(T.link); };
+    this.setMode = function (m) { st.mode = m; };
+    this.pulse = function (i0, now) { var d = {}, q = [i0]; d[i0] = 0; while (q.length) { var a = q.shift(); LAT.nodes[a].nb.forEach(function (b) { if (d[b] == null) { d[b] = d[a] + 1; q.push(b); } }); } for (var k in d) st.t0[k] = now + d[k] * .09; };
+    this.select = function (i0) { st.sel = i0; };
+    this.setPerf = function (p) { st.perf = p; };
+    function pick(ev) { var r = canvas.getBoundingClientRect(); mouse.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(mouse, cam); var h = ray.intersectObjects(meshes); return h.length ? h[0].object.userData.i : -1; }
+    function say(i) { if (!opt.read) return; opt.read.textContent = i < 0 ? opt.idle : "qubit " + LAT.nodes[i].rank + " · " + LAT.nodes[i].nb.length + " neighbours"; }
+    canvas.addEventListener("pointerdown", function (e) { st.drag = { x: e.clientX, y: e.clientY, z: st.rotZ, xx: st.rotX, moved: 0 }; try { canvas.setPointerCapture(e.pointerId); } catch (x) {} });
+    canvas.addEventListener("pointermove", function (e) {
+      if (st.drag) { var dx = e.clientX - st.drag.x, dy = e.clientY - st.drag.y; st.drag.moved = Math.max(st.drag.moved, Math.abs(dx) + Math.abs(dy)); st.rotZ = st.drag.z + dx * .008; st.rotX = Math.max(-1.45, Math.min(-.25, st.drag.xx + dy * .006)); st.last = performance.now() / 1000; }
+      else { var h = pick(e); if (h !== st.hover) { st.hover = h; say(h); canvas.style.cursor = h >= 0 ? "pointer" : "grab"; } } });
+    canvas.addEventListener("pointerup", function (e) { var d = st.drag; st.drag = null; if (d && d.moved < 5) { var h = pick(e); if (h >= 0) { st.sel = h; self.pulse(h, performance.now() / 1000); say(h); if (opt.onSelect) opt.onSelect(h); } } });
+    canvas.addEventListener("pointerleave", function () { if (!st.drag) { st.hover = -1; say(-1); } });
+    this.frame = function (now) {
+      if (!RM && now - st.last > 2.2 && !st.drag) st.rotZ += ((.5 + Math.sin(now * .25) * .35) - st.rotZ) * .02;
+      grp.rotation.x = st.rotX; grp.rotation.z = st.rotZ;
+      var P = st.perf, k, n, e, s, wave = P ? ((now * P.hz) % 1.5) * 9 - 7.5 : 0, selNb = st.sel >= 0 ? LAT.nodes[st.sel].nb : [];
+      for (k = 0; k < N; k++) {
+        n = LAT.nodes[k]; e = now >= st.t0[k] ? Math.exp(-(now - st.t0[k]) * 2.4) : 0; s = 1;
+        if (P) {
+          if (n.rank < P.n) {
+            if (Math.random() < P.flash * .016) st.err[k] = now + .4;
+            var ef = Math.max(0, (st.err[k] - now) / .4), w = Math.exp(-Math.pow((n.x - wave) * .5, 2));
+            base.copy(T.accent); tmp.copy(T.hot); base.lerp(tmp, w * .75); tmp.copy(T.err); base.lerp(tmp, ef); s = 1 + .5 * ef + .25 * w; meshes[k].material.opacity = 1;
+          } else { base.copy(T.link); meshes[k].material.opacity = .55; s = .8; }
+        } else {
+          if (st.mode === "deg") { base.copy(n.nb.length === 3 ? T.accent : n.nb.length === 1 ? T.ok : T.q); }
+          else if (st.mode === "row") { base.copy(T.accent); tmp.copy(T.hot); base.lerp(tmp, n.row / 6); }
+          else base.copy(T.q);
+          tmp.copy(T.hot); base.lerp(tmp, e * .9);
+          if (k === st.sel) { tmp.copy(T.ok); base.copy(tmp); s = 1.5; } else if (selNb.indexOf(k) >= 0) { tmp.copy(T.accent); base.lerp(tmp, .85); s = 1.25; }
+          s += .8 * e + (k === st.hover ? .3 : 0); meshes[k].material.opacity = 1;
+        }
+        meshes[k].material.color.copy(base); meshes[k].scale.setScalar(s);
+      }
+      ren.render(scene, cam);
+    };
+    lattices.push(this); new IntersectionObserver(function (es) { visible.set(self, es[0].isIntersecting); }, { rootMargin: "80px" }).observe(host); this.refresh();
+  }
+  function loop(ms) { lattices.forEach(function (l) { if (visible.get(l)) l.frame(ms / 1000); }); requestAnimationFrame(loop); }
+
+  var hero, perf;
+  function showQubit(i) {
+    var n = LAT.nodes[i]; $("qpId").textContent = "#" + n.rank; $("qpRow").textContent = n.row + (n.nb.length === 2 && false ? "" : ""); $("qpDeg").textContent = n.nb.length;
+    $("qpNb").textContent = n.nb.map(function (j) { return "#" + LAT.nodes[j].rank; }).join(" ");
+  }
+  function legend(mode) {
+    var h = { plain: [["--q", "qubit"]], deg: [["--ok", DEG[1] + " with 1 connection"], ["--q", DEG[2] + " with 2"], ["--accent", DEG[3] + " with 3"]], row: [["--accent", "top row"], ["--hot", "bottom row"]] }[mode];
+    $("legend").innerHTML = h.map(function (x) { return '<span><i style="--c:var(' + x[0] + ')"></i>' + x[1] + "</span>"; }).join("") + '<span><i style="--c:var(--ok)"></i>selected</span>';
+  }
+  function startGL() {
+    legend("plain");
+    if (!window.THREE) { ["heroLat", "perfLat"].forEach(function (id) { var m = document.createElement("div"); m.className = "nogl"; m.textContent = "The 3D library did not load, so the lattice view is unavailable."; $(id).insertBefore(m, $(id).firstChild); $(id).querySelector("canvas").style.display = "none"; }); return; }
+    readTokens();
+    hero = new Lattice($("heroLat"), $("heroCv"), { read: $("heroRead"), idle: "Drag to turn · click a qubit", onSelect: showQubit });
+    perf = new Lattice($("perfLat"), $("perfCv"), { perf: true });
+    readTokens(); applyPerf();
+    $("heroPulse").addEventListener("click", function () { if (!hero.pulse) return; var i = Math.floor(Math.random() * 127); hero.select(i); showQubit(i); hero.pulse(i, performance.now() / 1000); });
+    qsa("[data-mode]").forEach(function (b) { b.addEventListener("click", function () { qsa("[data-mode]").forEach(function (x) { x.classList.toggle("on", x === b); }); if (hero.setMode) hero.setMode(b.dataset.mode); legend(b.dataset.mode); }); });
+    requestAnimationFrame(loop);
+    if (window.matchMedia) { var mq = matchMedia("(prefers-color-scheme: dark)"); (mq.addEventListener ? mq.addEventListener("change", readTokens) : mq.addListener(readTokens)); }
+    new MutationObserver(readTokens).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  }
+
+  /* ================= access stack ================= */
+  var LAY = [
+    { n: "Quantum Platform", s: "Where you sign in and send work", c: "--a1", side: "Classical", does: "Keys, workloads, docs, learning",
+      t: "The platform is one suite of tools for research and development.",
+      p: "From the home page you get API keys, reach quantum computers, track your workloads and open documentation and learning material. Documentation gathers the Qiskit, service and API references. Learning hosts courses and modules, and a visual Circuit Composer for prototyping, simulating and debugging circuits is listed as coming soon.", li: ["API keys and access to the machines", "Workload tracking", "Documentation, courses and modules", "Circuit Composer (coming soon)"], tags: ["API keys", "Workloads", "Learning"] },
+    { n: "Middleware", s: "Circuit cutting and Quantum Serverless", c: "--a2", side: "Classical", does: "Splits big circuits, scales classical work",
+      t: "Middleware makes big problems fit small machines.",
+      p: "The circuit cutting Qiskit addon splits a large circuit into smaller ones that suit current hardware. Quantum Serverless connects elastic classical computing resources across several clouds to the Compute Service, so the classical side can grow when a job needs it.", li: ["Circuit knitting toolbox", "Circuit cutting addon", "Quantum Serverless across multiple clouds"], tags: ["Circuit cutting", "Serverless"] },
+    { n: "Compute Service", s: "Formerly the Qiskit Runtime Service", c: "--a3", side: "Classical", does: "Runs programs beside the chip, moves data",
+      t: "A classical runtime sits right next to the quantum chip.",
+      p: "The Compute Service is a portable, secure, containerized architecture. It runs quantum programs on a classical unit tightly integrated with the quantum processor, and it handles job orchestration and data transfer. IBM compares it to a GPU: it accelerates the computation instead of replacing the main program.", li: ["Portable and secure", "Orchestrates jobs and moves data", "Tightly coupled to the processor"], tags: ["Containerized", "Orchestration"] },
+    { n: "Superconducting processor", s: "Transmon qubits near absolute zero", c: "--a4", side: "Quantum", does: "Runs the circuit on 127+ qubits",
+      t: "The quantum processor is the only quantum layer.",
+      p: "IBM processors use superconducting transmon qubits, built from superconducting materials patterned on a silicon substrate. They must be kept near absolute zero so that electrical current can flow. Every system in the fleet has at least 127 qubits.", li: ["Superconducting material on silicon", "Cooled near absolute zero", "127 qubits or more"], tags: ["Transmon", "127+ qubits"] }
+  ];
+  var stkSel = 0, W = 200, H = 70, CX = 450, GAP = 128, TH = 10, Y0 = 96;
+  function iso(cx, cy, u, v) { return [cx + (u - v) * W / 2, cy + (u + v) * H / 2]; }
+  function pp(pts) { return pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join("") + "Z"; }
+  function rect(cx, cy, u0, v0, u1, v1, cls) { return '<path class="' + cls + '" d="' + pp([iso(cx, cy, u0, v0), iso(cx, cy, u1, v0), iso(cx, cy, u1, v1), iso(cx, cy, u0, v1)]) + '"/>'; }
+  function seg(cx, cy, u0, v0, u1, v1, cls, extra) { var a = iso(cx, cy, u0, v0), b = iso(cx, cy, u1, v1); return '<path class="' + cls + '" d="M' + a[0].toFixed(1) + " " + a[1].toFixed(1) + "L" + b[0].toFixed(1) + " " + b[1].toFixed(1) + '"' + (extra || "") + "/>"; }
+  function glyph(i, cx, cy) {
+    var o = "", k;
+    if (i === 0) { o += rect(cx, cy, -.78, -.78, .78, -.12, "gl") + seg(cx, cy, -.62, -.56, .3, -.56, "gl") + seg(cx, cy, -.62, -.38, .5, -.38, "gl") + rect(cx, cy, -.78, .1, -.08, .78, "gf") + rect(cx, cy, .1, .1, .78, .78, "gl") + seg(cx, cy, .22, .34, .66, .34, "gl") + seg(cx, cy, .22, .56, .5, .56, "gl"); }
+    if (i === 1) { o += rect(cx, cy, -.82, -.5, -.14, .5, "gf") + rect(cx, cy, .14, -.5, .82, .5, "gf") + seg(cx, cy, 0, -.85, 0, .85, "gl", ' stroke-dasharray="3 3"');
+      [-.3, 0, .3].forEach(function (v) { o += seg(cx, cy, -.14, v, -.04, v, "gl") + seg(cx, cy, .04, v, .14, v, "gl"); }); }
+    if (i === 2) { o += rect(cx, cy, -.36, -.36, .36, .36, "gf") + rect(cx, cy, -.16, -.16, .16, .16, "gl");
+      for (k = -.24; k <= .25; k += .24) o += seg(cx, cy, -.36, k, -.6, k, "gl") + seg(cx, cy, .36, k, .6, k, "gl") + seg(cx, cy, k, -.36, k, -.6, "gl") + seg(cx, cy, k, .36, k, .6, "gl"); o += seg(cx, cy, .6, 0, .9, 0, "gl", ' stroke-dasharray="2 2"'); }
+    if (i === 3) { LAT.edges.forEach(function (e) { var a = LAT.nodes[e[0]], b = LAT.nodes[e[1]]; o += seg(cx, cy, a.x / 8.2, -a.y / 7.2, b.x / 8.2, -b.y / 7.2, "gl"); });
+      LAT.nodes.forEach(function (n) { var p = iso(cx, cy, n.x / 8.2, -n.y / 7.2); o += '<circle class="gd" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="1.9"/>'; }); }
+    return o;
+  }
+  function cloud(x, y, s) { return '<path class="cld" transform="translate(' + x + " " + y + ") scale(" + s + ')" d="M-18 8C-30 8-30-8-16-8C-14-22 8-22 10-8C26-10 28 8 16 8Z"/>'; }
+  function drawStack() {
+    var bot = Y0 + 3 * GAP, h = '<svg viewBox="0 0 1100 ' + (bot + H + TH + 40) + '" width="100%" role="group" aria-label="Four layers from the platform down to the superconducting processor">';
+    h += '<path class="axis" d="M' + CX + " " + (Y0 - 50) + "V" + (bot + 10) + '"/>';
+    h += '<path class="brk" d="M40 ' + (Y0 - H) + "V" + (Y0 + 2 * GAP + H) + '"/><text class="svt" transform="translate(28 ' + (Y0 + GAP) + ') rotate(-90)" text-anchor="middle">CLASSICAL</text>';
+    h += '<path class="brk" d="M40 ' + (bot - H) + "V" + (bot + H) + '"/><text class="svt" transform="translate(28 ' + bot + ') rotate(-90)" text-anchor="middle">QUANTUM</text>';
+    h += cloud(150, Y0 + GAP - 24, 1) + cloud(206, Y0 + GAP + 10, .8) + cloud(120, Y0 + GAP + 24, .7) + '<text class="svt" x="150" y="' + (Y0 + GAP + 58) + '" text-anchor="middle">several clouds</text><path class="ld" d="M176 ' + (Y0 + GAP - 6) + "L" + (CX - W + 30) + " " + (Y0 + GAP) + '"/>';
+    for (var i = 3; i >= 0; i--) {
+      var L = LAY[i], cy = Y0 + i * GAP;
+      h += '<g class="ly' + (i === stkSel ? " sel" : "") + '" data-i="' + i + '" tabindex="0" role="button" aria-label="' + L.n + '" style="--c:var(' + L.c + ')">' +
+        '<path class="ps" d="M' + (CX - W) + " " + cy + "V" + (cy + TH) + "L" + CX + " " + (cy + H + TH) + "L" + (CX + W) + " " + (cy + TH) + "V" + cy + "L" + CX + " " + (cy + H) + 'Z"/>' +
+        '<path class="pt" d="M' + CX + " " + (cy - H) + "L" + (CX + W) + " " + cy + "L" + CX + " " + (cy + H) + "L" + (CX - W) + " " + cy + 'Z"/>' + glyph(i, CX, cy) +
+        '<path class="ld" d="M' + (CX + W + 6) + " " + cy + 'H700"/><text class="svs" x="712" y="' + (cy - 8) + '">' + L.n + '</text><text class="svb" x="712" y="' + (cy + 12) + '">' + L.s + '</text>' +
+        '<text class="svt" x="712" y="' + (cy + 34) + '" style="fill:var(' + L.c + ')">' + L.tags.join("  ·  ") + "</text></g>";
+    }
+    h += '<g class="job" id="stkJob" style="transform:translateY(' + Y0 + 'px)"><circle cx="' + CX + '" cy="0" r="7"/></g></svg>';
+    $("stk").innerHTML = h;
+    qsa(".ly", $("stk")).forEach(function (g) { var go = function () { stopJob(); selLayer(+g.dataset.i); }; g.addEventListener("click", go); g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+    $("stkTbl").innerHTML = LAY.map(function (L) { return "<tr><td>" + L.n + "</td><td>" + L.does + "</td><td>" + L.side + "</td></tr>"; }).join("");
+  }
+  function selLayer(i) {
+    stkSel = i; var L = LAY[i]; qsa(".ly", $("stk")).forEach(function (g) { g.classList.toggle("sel", +g.dataset.i === i); });
+    $("stkTag").textContent = L.n; $("stkTag").style.color = "var(" + L.c + ")";
+    $("stkInfo").innerHTML = "<div><h3>" + L.t + "</h3><p>" + L.p + "</p></div><div><h4 class='muted'>In this layer</h4><ul>" + L.li.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul></div>";
+  }
+  var jobT = null, STEPS = [[0, 0, "1. You write a circuit and submit it from the platform."], [1, 1, "2. Middleware cuts a circuit that is too big for the chip into smaller pieces."], [2, 2, "3. The Compute Service orchestrates the job on a classical unit beside the processor."], [3, 3, "4. The processor runs the circuit near absolute zero."], [4, 2, "5. Results return through the Compute Service."], [5, 0, "6. The platform shows you the finished workload."]];
+  function stopJob() { clearTimeout(jobT); jobT = null; }
+  function runJob() {
+    stopJob(); var k = 0, job = $("stkJob");
+    (function next() {
+      if (k >= STEPS.length) { jobT = null; $("stkRun").textContent = "Send a job again"; return; }
+      var s = STEPS[k]; job.classList.toggle("back", k >= 4); job.style.transform = "translateY(" + (Y0 + (k >= 4 ? (k === 4 ? 2 : 0) : s[0]) * GAP) + "px)";
+      selLayer(s[1]); $("stkStep").textContent = s[2]; k++; jobT = setTimeout(next, RM ? 1400 : 1700);
+    })();
+  }
+
+  /* ================= qubit types ================= */
+  function lab(x, y, t, a) { return '<text class="svb" x="' + x + '" y="' + y + '"' + (a ? ' text-anchor="' + a + '"' : "") + ">" + t + "</text>"; }
+  var QT = [
+    { n: "Superconducting", sub: "transmon qubits", c: "--a1", p: "Circuits made of superconducting material patterned on a silicon substrate. A qubit is a tiny loop of current. This is the type IBM uses.", li: ["Must be kept near absolute zero so current can flow", "Fast and finely controllable", "Described by IBM as having many advantages", "Not the only qubit type"],
+      art: '<rect x="20" y="150" width="440" height="30" rx="3" fill="var(--raise)" stroke="var(--line2)"/><text class="svt" x="30" y="170">silicon substrate</text>' +
+        '<rect x="150" y="70" width="64" height="58" rx="6" fill="color-mix(in srgb, var(--a1) 25%, var(--surface))" stroke="var(--a1)" stroke-width="2"/><rect x="266" y="70" width="64" height="58" rx="6" fill="color-mix(in srgb, var(--a1) 25%, var(--surface))" stroke="var(--a1)" stroke-width="2"/>' +
+        '<path d="M214 99H266" stroke="var(--a1)" stroke-width="2"/><rect x="232" y="90" width="18" height="18" fill="var(--hot)" stroke="var(--ink)" stroke-width="1"/><path d="M232 90L250 108M250 90L232 108" stroke="var(--surface)" stroke-width="1.4"/>' +
+        '<path d="M330 99H370C380 99 380 72 392 72S404 126 416 126S428 72 440 72" fill="none" stroke="var(--a3)" stroke-width="2"/><path d="M20 99H150" stroke="var(--a4)" stroke-width="2" stroke-dasharray="5 4"/>' +
+        '<path d="M241 60V34" class="ax"/>' + lab(241, 26, "Josephson junction", "middle") + '<path d="M182 134V196" class="ax"/>' + lab(182, 212, "capacitor pad", "middle") + '<path d="M410 134V196" class="ax"/>' + lab(410, 212, "readout resonator", "middle") + lab(24, 86, "drive line") },
+    { n: "Photonic", sub: "single photons", c: "--a4", p: "Qubits carried by single particles of light, guided through optical components and counted by detectors.", li: ["Uses single photons", "Suits quantum communication and cryptography", "One of the other qubit types the course names"],
+      art: '<circle cx="50" cy="100" r="26" fill="color-mix(in srgb, var(--a4) 25%, var(--surface))" stroke="var(--a4)" stroke-width="2"/><circle cx="50" cy="100" r="6" fill="var(--a4)"/>' +
+        '<path d="M76 100H210" stroke="var(--a4)" stroke-width="2.4"/><path d="M96 100c6-14 12 14 18 0s12 14 18 0 12 14 18 0" fill="none" stroke="var(--hot)" stroke-width="2"/>' +
+        '<rect x="210" y="76" width="48" height="48" fill="var(--raise)" stroke="var(--a4)" stroke-width="2"/><path d="M210 124L258 76" stroke="var(--a4)" stroke-width="2"/>' +
+        '<path d="M258 100H380" stroke="var(--a4)" stroke-width="2.4"/><path d="M234 76V30H380" fill="none" stroke="var(--a4)" stroke-width="2.4"/>' +
+        '<path d="M380 80a24 24 0 0 1 0 40Z" fill="var(--muted)"/><path d="M380 10a24 24 0 0 1 0 40Z" fill="var(--muted)"/><rect x="380" y="10" width="2" height="40" fill="var(--muted)"/>' + lab(50, 150, "single-photon source", "middle") + lab(234, 146, "beam splitter", "middle") + lab(420, 100, "detector") + lab(420, 34, "detector") },
+    { n: "Trapped ion", sub: "charged atoms", c: "--a2", p: "Qubits stored in charged atoms held in place by electric fields and controlled with lasers.", li: ["Uses charged atoms (ions)", "Long coherence times, so they hold their state", "Runs slower than superconducting qubits"],
+      art: '<rect x="40" y="40" width="400" height="14" rx="3" fill="var(--raise)" stroke="var(--line2)"/><rect x="40" y="146" width="400" height="14" rx="3" fill="var(--raise)" stroke="var(--line2)"/>' +
+        '<g fill="color-mix(in srgb, var(--a2) 40%, var(--surface))" stroke="var(--a2)" stroke-width="2"><circle cx="110" cy="100" r="16"/><circle cx="180" cy="100" r="16"/><circle cx="250" cy="100" r="16"/><circle cx="320" cy="100" r="16"/><circle cx="390" cy="100" r="16"/></g>' +
+        '<path d="M250 6V80" stroke="var(--hot)" stroke-width="3"/><path d="M243 72L250 84L257 72" fill="var(--hot)"/>' + lab(262, 20, "control laser") + lab(40, 34, "electrodes") + lab(40, 184, "electric fields hold the ions in a line") }
+  ], qtSel = 0;
+  function drawQT() {
+    var tabs = $("qtTabs"); tabs.innerHTML = "";
+    QT.forEach(function (q, i) { var b = document.createElement("button"); b.className = "btn"; b.textContent = q.n; b.setAttribute("aria-pressed", i === qtSel); b.addEventListener("click", function () { qtSel = i; drawQT(); }); tabs.appendChild(b); });
+    var q = QT[qtSel]; $("qtTag").textContent = q.sub;
+    $("qtPanel").innerHTML = '<div class="svgw"><svg viewBox="0 0 480 224" width="100%" role="img" aria-label="Simple labelled picture of ' + q.n + ' qubits">' + q.art + '</svg></div><div><h3>' + q.n + ' qubits</h3><p>' + q.p + '</p><ul>' + q.li.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul></div>";
+  }
+
+  /* ================= performance lab ================= */
+  function pLine(n, e) { return Math.pow(1 - e / 100, n * 10); }
+  function drawChart(n, e, P) {
+    var X0 = 56, X1 = 536, Y0c = 14, Y1 = 246, MINL = -8, h = "", d;
+    function xs(v) { return X0 + (v / 127) * (X1 - X0); } function ys(p) { var l = Math.max(MINL, Math.log10(Math.max(p, 1e-12))); return Y1 - (l - MINL) / (0 - MINL) * (Y1 - Y0c); }
+    for (d = 0; d >= MINL; d -= 2) { h += '<path class="gr" d="M' + X0 + " " + ys(Math.pow(10, d)) + "H" + X1 + '"/><text class="svt" x="' + (X0 - 8) + '" y="' + (ys(Math.pow(10, d)) + 4) + '" text-anchor="end">' + (d === 0 ? "100%" : "10^" + d) + "</text>"; }
+    [0, 32, 64, 96, 127].forEach(function (v) { h += '<text class="svt" x="' + xs(v) + '" y="270" text-anchor="middle">' + v + "</text>"; });
+    h += '<path class="ax" d="M' + X0 + " " + Y0c + "V" + Y1 + "H" + X1 + '"/><text class="svt" x="' + (X0 + X1) / 2 + '" y="286" text-anchor="middle">qubits used</text>';
+    [[.01, "--ok"], [.1, "--a3"], [1, "--hot"]].forEach(function (c) { var pts = ""; for (var v = 1; v <= 127; v += 2) pts += (pts ? "L" : "M") + xs(v).toFixed(1) + " " + ys(pLine(v, c[0])).toFixed(1);
+      h += '<path class="cv" style="stroke:var(' + c[1] + ')" d="' + pts + '"/><text class="svt" x="' + (X1 - 4) + '" y="' + (ys(pLine(127, c[0])) - 6) + '" text-anchor="end" style="fill:var(' + c[1] + ')">' + c[0] + "% per gate</text>"; });
+    h += '<circle cx="' + xs(n).toFixed(1) + '" cy="' + ys(P).toFixed(1) + '" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/><path d="M' + xs(n).toFixed(1) + " " + ys(P).toFixed(1) + "V" + Y1 + '" stroke="var(--accent)" stroke-dasharray="3 3" fill="none"/>';
+    h += '<text class="svt" x="' + X0 + '" y="8">chance of no error in one run</text>';
+    $("chartP").innerHTML = h;
+  }
+  function drawRadar(sc, ql, sp) {
+    var cx = 200, cy = 130, R = 92, ang = [-90, 30, 150], h = "";
+    function pt(a, r) { var t = a * Math.PI / 180; return [cx + Math.cos(t) * r, cy + Math.sin(t) * r]; }
+    [.33, .66, 1].forEach(function (f) { h += '<path class="gr" d="' + pp(ang.map(function (a) { return pt(a, R * f); })) + '"/>'; });
+    ang.forEach(function (a) { var p = pt(a, R); h += '<path class="gr" d="M' + cx + " " + cy + "L" + p[0] + " " + p[1] + '"/>'; });
+    var v = [sc, ql, sp], pts = ang.map(function (a, i) { return pt(a, R * Math.max(.02, v[i])); });
+    h += '<path d="' + pp(pts) + '" fill="color-mix(in srgb, var(--accent) 28%, transparent)" stroke="var(--accent)" stroke-width="2"/>';
+    pts.forEach(function (p) { h += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" fill="var(--accent)"/>'; });
+    h += '<text class="svs" x="' + cx + '" y="' + (cy - R - 14) + '" text-anchor="middle">Scale</text><text class="svs" x="' + (cx + R * .87 + 16) + '" y="' + (cy + R * .5 + 20) + '">Quality</text><text class="svs" x="' + (cx - R * .87 - 16) + '" y="' + (cy + R * .5 + 20) + '" text-anchor="end">Speed</text>';
+    h += '<text class="svb" x="380" y="70">Scale <tspan class="mono" style="fill:var(--ink)">' + Math.round(sc * 100) + "%</tspan></text><text class=\"svb\" x=\"380\" y=\"100\">Quality <tspan style=\"fill:var(--ink)\">" + Math.round(ql * 100) + "%</tspan></text><text class=\"svb\" x=\"380\" y=\"130\">Speed <tspan style=\"fill:var(--ink)\">" + Math.round(sp * 100) + '%</tspan></text><text class="svt" x="380" y="160">the three dimensions,</text><text class="svt" x="380" y="176">each scaled 0 to 100%</text>';
+    $("radar").innerHTML = h;
+  }
+  function applyPerf() {
+    var n = +$("pN").value, ev = +$("pE").value, sv = +$("pS").value, e = Math.pow(10, -2 + ev / 100 * (Math.log10(3) + 2)), sp = Math.round(Math.pow(10, 1 + sv * .04));
+    var gates = n * 10, p = pLine(n, e), r = sp * p;
+    $("pNo").textContent = n; $("pEo").textContent = e.toFixed(e < 1 ? 2 : 1) + "%"; $("pSo").textContent = fmtN(sp); $("kG").textContent = fmtN(gates);
+    $("kP").textContent = p >= .01 ? (p * 100).toFixed(1) + "%" : p > 1e-12 ? "1 in " + fmtN(Math.round(1 / p)) : "~ never"; $("kPm").style.width = Math.max(.5, p * 100) + "%";
+    $("kR").textContent = r >= 10 ? fmtN(Math.round(r)) : r >= .01 ? r.toFixed(2) : r > 1e-9 ? r.toExponential(1) : "~ 0";
+    $("perfCap").textContent = n + " of 127 qubits in use";
+    drawChart(n, e, p); drawRadar(n / 127, 1 - ev / 100 * 1, sv / 100);
+    if (perf && perf.setPerf) perf.setPerf({ n: n, flash: Math.min(8, e / 100 * 200), hz: .4 + Math.log10(sp / 10) * .55 });
+  }
+  function setPre(s) { var a = s.split(","), e = +a[1]; $("pN").value = +a[0]; $("pE").value = Math.round((Math.log10(e) + 2) / (Math.log10(3) + 2) * 100); $("pS").value = Math.round((Math.log10(+a[2]) - 1) / .04); applyPerf(); }
+
+  /* ================= error correction toy ================= */
+  var ec = { err: [], fail: [], hist: [], cyc: 0, timer: null }, EC_R = 12, EC_C = 24, built = false;
+  function ecReset() { clearInterval(ec.timer); ec.timer = null; ec.err = new Array(EC_R * EC_C).fill(false); ec.fail = new Array(EC_R).fill(false); ec.hist = [12]; ec.cyc = 0; ecDraw(); $("ecRun").disabled = false; }
+  function ecDraw() {
+    var host = $("ec");
+    if (!built) { var h = ""; for (var r = 0; r < EC_R; r++) { h += '<div class="ecrow"><span>L' + (r + 1) + '</span><div class="cells">'; for (var c = 0; c < EC_C; c++) h += c < 12 ? "<i></i>" : '<i class="ck"></i>'; h += "</div></div>"; } host.innerHTML = h; built = true; }
+    var alive = 0; qsa(".cells", host).forEach(function (row, r) { row.classList.toggle("fail", ec.fail[r]); if (!ec.fail[r]) alive++; for (var c = 0; c < EC_C; c++) { var el = row.children[c]; el.classList.toggle("e", !!(ec.err[r * EC_C + c] && !ec.fail[r])); } });
+    $("ecState").textContent = alive + " of 12 logical qubits intact · cycle " + ec.cyc; $("ecPo").textContent = (+$("ecP").value / 10).toFixed(1) + "%"; drawEC();
+  }
+  function drawEC() {
+    var X0 = 40, X1 = 506, Y0c = 12, Y1 = 150, mx = Math.max(50, ec.hist.length - 1), h = "", k;
+    function xs(v) { return X0 + v / mx * (X1 - X0); } function ys(v) { return Y1 - v / 12 * (Y1 - Y0c); }
+    [0, 4, 8, 12].forEach(function (v) { h += '<path class="gr" d="M' + X0 + " " + ys(v) + "H" + X1 + '"/><text class="svt" x="' + (X0 - 8) + '" y="' + (ys(v) + 4) + '" text-anchor="end">' + v + "</text>"; });
+    h += '<path class="ax" d="M' + X0 + " " + Y0c + "V" + Y1 + "H" + X1 + '"/>';
+    var pts = ec.hist.map(function (v, i) { return (i ? "L" : "M") + xs(i).toFixed(1) + " " + ys(v).toFixed(1); }).join("");
+    h += '<path class="cv" style="stroke:var(--accent)" d="' + pts + '"/>';
+    [0, 25, 50].forEach(function (v) { if (v <= mx) h += '<text class="svt" x="' + xs(v) + '" y="168" text-anchor="middle">' + v + "</text>"; });
+    h += '<text class="svt" x="' + (X0 + X1) / 2 + '" y="184" text-anchor="middle">check cycles</text><text class="svt" x="' + X0 + '" y="8">logical qubits intact</text>';
+    $("chartE").innerHTML = h;
+  }
+  function ecStep() {
+    var p = +$("ecP").value / 1000, on = $("ecOn").checked, alive = 0;
+    for (var r = 0; r < EC_R; r++) { if (!ec.fail[r]) { var fresh = 0, total = 0, c;
+      for (c = 0; c < EC_C; c++) { var i = r * EC_C + c; if (Math.random() < p) { ec.err[i] = true; fresh++; } if (ec.err[i]) total++; }
+      if ((on ? fresh : total) > 3) ec.fail[r] = true; else if (on) for (c = 0; c < EC_C; c++) ec.err[r * EC_C + c] = false; }
+      if (!ec.fail[r]) alive++; }
+    ec.cyc++; ec.hist.push(alive); ecDraw();
+  }
+  function ecRun() { var left = 50; $("ecRun").disabled = true; clearInterval(ec.timer); ec.timer = setInterval(function () { ecStep(); if (--left <= 0) { clearInterval(ec.timer); ec.timer = null; $("ecRun").disabled = false; } }, RM ? 40 : 110); }
+
+  /* ================= roadmap ================= */
+  var YEARS = ["2023", "2024", "2025", "2026", "2027-28", "2029+"], LANES = ["Algorithms and use cases", "Error correction", "Hardware and scale"];
+  var EV = [
+    { id: "a0", lane: 0, col: 0, c: "--a1", y: "2023", t: "Quantum utility", p: "IBM and UC Berkeley presented evidence that quantum computers can deliver value sooner than expected, helped by hardware advances and error mitigation.", li: ["127 qubits on the Eagle processor simulated a quantum Ising model", "Zero-noise extrapolation (ZNE) estimated expectation values", "Classical tensor networks faltered as difficulty rose"], big: "127 qubits" },
+    { id: "a1", lane: 0, col: 1, c: "--a1", y: "2024", t: "5k challenge tool", p: "IBM released a tool for calculating unbiased observables of long, high-quality circuits. Earlier called the 100x100 challenge.", li: ["Aims at 5,000 gates in a single computation", "Combines power with exact numbers"], big: "5,000 gates" },
+    { id: "a2", lane: 0, col: 3, c: "--a1", y: "2026", t: "Near-term quantum advantage", p: "The roadmap on the course page targets near-term quantum advantage by 2026, when a quantum method beats the best classical ones on a task that matters.", li: ["Today's era is called quantum utility", "Needs viable circuits shown to beat classical methods"], big: "target 2026" },
+    { id: "e0", lane: 1, col: 1, c: "--a3", y: "2024", t: "Gross code", p: "Error correction has been studied for decades, but theory often needed too many qubits. IBM's Gross code (Nature paper) is roughly 10 times more efficient than earlier methods.", li: ["288 qubits protect 12 logical qubits", "About a million error-check cycles", "Mitigation and suppression stay useful alongside it"], big: "288 → 12" },
+    { id: "e1", lane: 1, col: 5, c: "--a3", y: "2029", t: "Starling", p: "A large-scale fault-tolerant system planned for 2029 and being built in Poughkeepsie, New York.", li: ["200 logical qubits", "Circuits with 100 million gates"], big: "200 logical" },
+    { id: "h0", lane: 2, col: 0, c: "--a4", y: "2023", t: "Eagle, 127 qubits", p: "The processor behind the utility experiment. Superconducting transmon qubits on a silicon substrate, kept near absolute zero.", li: ["Every IBM system on the page has at least 127 qubits", "Heavy-hex lattice drawn at the top of this page"], big: "127 qubits" },
+    { id: "h1", lane: 2, col: 1, c: "--a4", y: "2024", t: "Crossbill", p: "The first single processor made from multiple chips, a step toward modular scaling.", li: ["Part of the quantum-centric supercomputing plan", "Needs quantum communication between chips"], big: "multi-chip" },
+    { id: "h2", lane: 2, col: 5, c: "--a4", y: "Later", t: "100,000 qubits and beyond", p: "The architecture aims for a clear path past 100,000 qubits through modular design, quantum communication and hybrid cloud middleware.", li: ["Classical and quantum resources working as one unit"], big: "100,000+" }
+  ], tlSel = "a0";
+  function drawRoad() {
+    var h = '<div class="h"></div>' + YEARS.map(function (y) { return '<div class="h">' + y + "</div>"; }).join("");
+    LANES.forEach(function (ln, r) { h += '<div class="ln">' + ln + "</div>";
+      for (var c = 0; c < 6; c++) { h += '<div class="c">'; EV.forEach(function (e) { if (e.lane === r && e.col === c) h += '<button class="rn' + (e.id === tlSel ? " on" : "") + '" data-ev="' + e.id + '" style="--c:var(' + e.c + ')" aria-pressed="' + (e.id === tlSel) + '"><i></i>' + e.t + "</button>"; }); h += "</div>"; } });
+    $("road").innerHTML = h; qsa("[data-ev]", $("road")).forEach(function (b) { b.addEventListener("click", function () { tlSel = b.dataset.ev; drawRoad(); }); });
+    var e = EV.filter(function (x) { return x.id === tlSel; })[0]; $("tlTag").textContent = e.y + " · " + e.t;
+    $("tlc").innerHTML = "<div><h3>" + e.t + "</h3><p>" + e.p + '</p><div class="stats" style="grid-template-columns:1fr;border:0;margin-top:14px"><div style="padding:0"><span class="n" style="color:var(' + e.c + ')">' + e.big + '</span><span class="t">' + LANES[e.lane] + " · " + e.y + "</span></div></div></div><div><h4 class='muted'>Details</h4><ul>" + e.li.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul></div>";
+  }
+  function bars(id, items, mn, mx) { $(id).innerHTML = items.map(function (it) { var w = (Math.log10(it[1]) - Math.log10(mn)) / (Math.log10(mx) - Math.log10(mn)) * 100; return '<div class="bar"><span>' + it[0] + '</span><div class="tr"><i style="width:' + Math.max(2, w) + "%;--c:var(" + it[2] + ')"></i></div><b>' + (it[3] || fmtN(it[1])) + "</b></div>"; }).join(""); }
+  function drawModular() {
+    var h = "", cx0 = [60, 290], cy0 = [30, 150], k = 0, bx, by;
+    cx0.forEach(function (x) { cy0.forEach(function (y) { h += '<rect x="' + x + '" y="' + y + '" width="170" height="96" rx="8" fill="color-mix(in srgb, var(--a4) 12%, var(--surface))" stroke="var(--a4)"/>';
+      for (var i = 0; i < 4; i++) for (var j = 0; j < 7; j++) h += '<circle cx="' + (x + 22 + j * 21) + '" cy="' + (y + 22 + i * 17) + '" r="3.2" fill="var(--a4)"/>'; k++; }); });
+    h += '<path d="M230 78H290M230 198H290M145 126V150M375 126V150" stroke="var(--hot)" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/><text class="svt" x="260" y="70" text-anchor="middle">links</text><text class="svt" x="230" y="146" text-anchor="middle" transform="translate(0 0)"></text>';
+    h += '<rect x="60" y="270" width="400" height="44" rx="8" fill="color-mix(in srgb, var(--a2) 14%, var(--surface))" stroke="var(--a2)"/><text class="svs" x="260" y="297" text-anchor="middle">Hybrid cloud middleware + classical HPC</text><path d="M260 246V270" stroke="var(--muted)" stroke-width="1.4" fill="none"/>';
+    h += '<text class="svt" x="260" y="16" text-anchor="middle">one processor, several chips</text>';
+    $("modular").previousElementSibling.innerHTML = h; $("modular").remove();
+  }
+
+  /* ================= glossary ================= */
+  var GL = [["Qiskit", "IBM's open-source software kit for writing and running quantum programs."], ["QPU", "Quantum processing unit: the quantum chip plus the classical hardware that feeds it and reads it out."], ["Transmon", "The superconducting qubit design IBM uses: a small circuit with a Josephson junction, patterned on silicon."], ["Logical qubit", "An error-protected qubit made from many physical qubits working together."], ["ZNE", "Zero-noise extrapolation: run a circuit at several noise levels and extrapolate to what zero noise would give."], ["Tensor network", "A classical method for approximating quantum systems. It works well until the problem gets too entangled."], ["QuOps", "Qubit operations: IBM's measure of how many demanding operations run reliably before errors dominate."], ["CLOPS", "Circuit layer operations per second, a speed benchmark."], ["EPLG", "Error per layered gate, a quality benchmark derived from layer fidelity."], ["Fault tolerance", "Computing correctly even though the parts make errors, using error correction."]];
+  function drawGl() {
+    $("terms").innerHTML = ""; GL.forEach(function (g, i) { var b = document.createElement("button"); b.className = "btn"; b.textContent = g[0]; b.addEventListener("click", function () { qsa("#terms .btn").forEach(function (x) { x.classList.toggle("on", x === b); }); $("defn").innerHTML = "<b>" + g[0] + ".</b> " + g[1]; }); $("terms").appendChild(b); });
+    qsa("#terms .btn")[0].click();
+  }
+
+  /* ================= wire up ================= */
+  drawStack(); selLayer(0); $("stkStep").textContent = "Press Send a job to follow one program through the layers."; $("stkRun").addEventListener("click", runJob);
+  drawQT();
+  ["pN", "pE", "pS"].forEach(function (id) { $(id).addEventListener("input", applyPerf); });
+  qsa("[data-pre]").forEach(function (b) { b.addEventListener("click", function () { setPre(b.dataset.pre); }); });
+  applyPerf();
+  qsa("[data-ans]").forEach(function (b) { b.addEventListener("click", function () {
+    $("fb").innerHTML = b.dataset.ans === "f" ? "<b style='color:var(--ok)'>Correct, it is false.</b> A machine with many qubits but low quality and low throughput loses its stored information before useful results appear. Power depends on scale, quality and speed together." : "<b style='color:var(--err)'>Not quite.</b> Qubit count is only the scale dimension. Quality and speed matter as much, and the lab above lets you see why."; }); });
+  $("ecP").addEventListener("input", ecDraw); $("ecRun").addEventListener("click", ecRun); $("ecReset").addEventListener("click", ecReset);
+  ecReset(); drawRoad(); drawModular(); drawGl();
+  bars("bQ", [["Eagle experiment", 127, "--a4"], ["Gross code block", 288, "--a3"], ["Modular goal", 100000, "--a2", "100,000+"]], 100, 100000);
+  bars("bG", [["5k challenge", 5000, "--a1"], ["Starling plan", 100000000, "--a3", "100 million"]], 1000, 100000000);
+  bars("bL", [["Gross code block", 12, "--a3"], ["Starling plan", 200, "--a4"]], 10, 300);
+  qsa("[data-go]").forEach(function (b) { b.addEventListener("click", function () { tlSel = b.dataset.go; drawRoad(); $("road").scrollIntoView({ block: "center", behavior: RM ? "auto" : "smooth" }); }); });
+  startGL();
+
+  var navA = qsa(".top nav a"), secs = ["stack", "qubits", "performance", "next"].map($);
+  function onScroll() { var d = document.documentElement; d.style.setProperty("--prog", Math.min(1, d.scrollTop / Math.max(1, d.scrollHeight - innerHeight))); var cur = -1; secs.forEach(function (s, i) { if (s.getBoundingClientRect().top < innerHeight * .4) cur = i; }); navA.forEach(function (a, i) { a.classList.toggle("on", i === cur); }); }
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+})();
+</script>
+</body></html>
